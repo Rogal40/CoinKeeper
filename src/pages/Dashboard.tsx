@@ -1,3 +1,5 @@
+import AddTransactionForm from "../components/AddTransactionForm";
+import TransactionList from "../components/TransactionList";
 import { signOut } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase";
@@ -16,11 +18,14 @@ export default function Dashboard() {
     <div>
       <h1>Dashboard</h1>
       {user && (
-        <div>
-          <p>Welcome, <strong>{user.email}</strong></p>
-        </div>
+        <p>
+          Logged in as <strong>{user.email}</strong>
+        </p>
       )}
       <button onClick={handleLogout}>Logout</button>
+
+      <AddTransactionForm />
+      <TransactionList />
     </div>
   );
 }

@@ -3,27 +3,15 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import type { Category } from "../../types/category";
 import * as api from "../../api/categories";
 
-// Async thunks
-export const loadCategories = createAsyncThunk<Category[]>(
+export const loadCategories = createAsyncThunk<Category[], string>(
   "categories/loadAll",
-  async () => {
-    return await api.fetchCategories();
-  }
+  async (uid) => await api.fetchCategories(uid)
 );
 
-export const addCategory = createAsyncThunk<
-  Category,
-  { name: string; color?: string }
->("categories/addOne", async (payload) => {
-  return await api.createCategory(payload);
-});
-
-export const updateCategoryThunk = createAsyncThunk<
-  void,
-  { id: string; updates: Partial<Omit<Category, "id" | "userId">> }
->("categories/updateOne", async ({ id, updates }) => {
-  await api.updateCategory(id, updates);
-});
+export const addCategory = createAsyncThunk<Category, Omit<Category, "id">>(
+  "categories/addOne",
+  async (payload) => await api.createCategory(payload)
+);
 
 export const deleteCategoryThunk = createAsyncThunk<string, string>(
   "categories/deleteOne",
@@ -33,7 +21,6 @@ export const deleteCategoryThunk = createAsyncThunk<string, string>(
   }
 );
 
-// Slice
 interface CategoriesState {
   items: Category[];
   loading: boolean;
@@ -49,12 +36,9 @@ const initialState: CategoriesState = {
 const categoriesSlice = createSlice({
   name: "categories",
   initialState,
-  reducers: {
-    /* no sync reducers */
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      // load all
       .addCase(loadCategories.pending, (s) => {
         s.loading = true;
         s.error = null;
@@ -67,18 +51,9 @@ const categoriesSlice = createSlice({
         s.loading = false;
         s.error = a.error.message ?? "Failed to load categories";
       })
-
-      // add
       .addCase(addCategory.fulfilled, (s, a: PayloadAction<Category>) => {
         s.items.push(a.payload);
       })
-
-      // update
-      .addCase(updateCategoryThunk.fulfilled, (s, a) => {
-        // no payload, we could re-fetch or optimistically update
-      })
-
-      // delete
       .addCase(deleteCategoryThunk.fulfilled, (s, a: PayloadAction<string>) => {
         s.items = s.items.filter((c) => c.id !== a.payload);
       });

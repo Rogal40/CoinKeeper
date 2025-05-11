@@ -1,19 +1,7 @@
-// src/api/axios.ts
 import axios from "axios";
-import { auth } from "../firebase";
 
-const instance = axios.create({
-  baseURL: "http://localhost:3001",
-  headers: { "Content-Type": "application/json" },
+const api = axios.create({
+  baseURL: "http://localhost:3000", // или тот порт, где у тебя работает JSON Server
 });
 
-instance.interceptors.request.use(async (config) => {
-  const token = await auth.currentUser?.getIdToken();
-  if (token && config.headers) {
-    // config.headers is an AxiosHeaders instance:
-    config.headers.set("Authorization", `Bearer ${token}`);
-  }
-  return config;
-});
-
-export default instance;
+export default api;

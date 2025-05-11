@@ -14,3 +14,10 @@ export async function createTransaction(data: Omit<Transaction, "id">): Promise<
 export async function deleteTransaction(id: string): Promise<void> {
   await api.delete(`/transactions/${id}`);
 }
+
+export async function updateTransaction(
+  id: string,
+  updates: Partial<Omit<Transaction, "id" | "userId">>
+): Promise<void> {
+  await api.patch(`/transactions/${id}`, updates);
+}

@@ -1,4 +1,5 @@
 // src/types/transaction.ts
+
 export interface Transaction {
   id: string;
   userId: string;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addTransaction } from "../features/transactions/transactionsSlice";
 import { loadCategories } from "../features/categories/categoriesSlice";
@@ -7,18 +7,20 @@ import { auth } from "../firebase";
 
 export default function AddTransactionForm() {
   const dispatch = useAppDispatch();
-  const categories = useAppSelector((s) => s.categories.items);
+  const categories = useAppSelector((state) => state.categories.items);
   const [user] = useAuthState(auth);
 
   const [type, setType] = useState<"income" | "expense">("income");
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<number>(0);
   const [categoryId, setCategoryId] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    if (user) dispatch(loadCategories(user.uid));
-  }, [dispatch, user]);
+    if (user) {
+      dispatch(loadCategories(user.uid));
+    }
+  }, [user, dispatch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,22 +45,45 @@ export default function AddTransactionForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Add Transaction</h2>
       <select value={type} onChange={(e) => setType(e.target.value as any)}>
         <option value="income">Income</option>
         <option value="expense">Expense</option>
       </select>
 
-      <input type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} required />
-      <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(Number(e.target.value))}
+        required
+      />
+
+      <select
+        value={categoryId}
+        onChange={(e) => setCategoryId(e.target.value)}
+        required
+      >
         <option value="">Select category</option>
         {categories.map((c) => (
-          <option key={c.id} value={c.id}>{c.name}</option>
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
         ))}
       </select>
 
-      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-      <input type="text" placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} />
+      <input
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+        required
+      />
+
+      <input
+        type="text"
+        placeholder="Description (optional)"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+
       <button type="submit">Add</button>
     </form>
   );

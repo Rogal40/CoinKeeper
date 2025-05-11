@@ -5,7 +5,9 @@ import * as api from "../../api/categories";
 
 export const loadCategories = createAsyncThunk<Category[], string>(
   "categories/loadAll",
-  async (uid) => await api.fetchCategories(uid)
+  async (uid) => {
+    return await api.fetchCategories(uid);
+  }
 );
 
 export const addCategory = createAsyncThunk<Category, Omit<Category, "id">>(

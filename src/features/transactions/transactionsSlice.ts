@@ -1,9 +1,40 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import * as api from "../../api/transactions";
 import type { Transaction } from "../../types/transaction";
+import * as api from "../../api/transactions";
 
-export interface TransactionsState {
+// Async thunks
+export const loadTransactions = createAsyncThunk<Transaction[]>(
+  "transactions/loadAll",
+  async () => {
+    return await api.fetchTransactions();
+  }
+);
+
+export const addTransaction = createAsyncThunk<
+  Transaction,
+  Omit<Transaction, "id" | "userId">
+>("transactions/addOne", async (payload) => {
+  return await api.createTransaction(payload);
+});
+
+export const updateTransactionThunk = createAsyncThunk<
+  void,
+  { id: string; updates: Partial<Omit<Transaction, "id" | "userId">> }
+>("transactions/updateOne", async ({ id, updates }) => {
+  await api.updateTransaction(id, updates);
+});
+
+export const deleteTransactionThunk = createAsyncThunk<string, string>(
+  "transactions/deleteOne",
+  async (id) => {
+    await api.deleteTransaction(id);
+    return id;
+  }
+);
+
+// Slice
+interface TransactionsState {
   items: Transaction[];
   loading: boolean;
   error: string | null;
@@ -15,104 +46,49 @@ const initialState: TransactionsState = {
   error: null,
 };
 
-// Thunks
-export const loadTransactions = createAsyncThunk<
-  Transaction[],
-  void,
-  { rejectValue: string }
->("transactions/loadAll", async (_, { rejectWithValue }) => {
-  try {
-    return await api.fetchTransactions();
-  } catch (err: any) {
-    return rejectWithValue(err.message);
-  }
-});
-
-export const addTransaction = createAsyncThunk<
-  Transaction,
-  Omit<Transaction, "id" | "userId">,
-  { rejectValue: string }
->("transactions/add", async (data, { rejectWithValue }) => {
-  try {
-    return await api.createTransaction(data);
-  } catch (err: any) {
-    return rejectWithValue(err.message);
-  }
-});
-
-export const updateTransactionThunk = createAsyncThunk<
-  Transaction,
-  { id: string; updates: Partial<Omit<Transaction, "id" | "userId">> },
-  { rejectValue: string }
->("transactions/update", async ({ id, updates }, { rejectWithValue }) => {
-  try {
-    return await api.updateTransaction(id, updates);
-  } catch (err: any) {
-    return rejectWithValue(err.message);
-  }
-});
-
-export const deleteTransactionThunk = createAsyncThunk<
-  string,
-  string,
-  { rejectValue: string }
->("transactions/delete", async (id, { rejectWithValue }) => {
-  try {
-    await api.deleteTransaction(id);
-    return id;
-  } catch (err: any) {
-    return rejectWithValue(err.message);
-  }
-});
-
 const transactionsSlice = createSlice({
   name: "transactions",
   initialState,
-  reducers: {},
+  reducers: {
+    // Here you could add synchronous helpers if needed
+  },
   extraReducers: (builder) => {
     builder
       // load
-      .addCase(loadTransactions.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      .addCase(loadTransactions.pending, (s) => {
+        s.loading = true;
+        s.error = null;
       })
       .addCase(
         loadTransactions.fulfilled,
-        (state, action: PayloadAction<Transaction[]>) => {
-          state.items = action.payload;
-          state.loading = false;
+        (s, a: PayloadAction<Transaction[]>) => {
+          s.items = a.payload;
+          s.loading = false;
         }
       )
-      .addCase(loadTransactions.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          action.payload || action.error.message || "Failed to load";
+      .addCase(loadTransactions.rejected, (s, a) => {
+        s.loading = false;
+        s.error = a.error.message ?? "Failed to load transactions";
       })
+
       // add
-      .addCase(addTransaction.fulfilled, (state, action) => {
-        state.items.push(action.payload);
+      .addCase(addTransaction.fulfilled, (s, a: PayloadAction<Transaction>) => {
+        // newest on top
+        s.items.unshift(a.payload);
       })
-      .addCase(addTransaction.rejected, (state, action) => {
-        state.error = action.payload || action.error.message || "Add failed";
+
+      // update (no payload, server‐side persisted)
+      .addCase(updateTransactionThunk.fulfilled, (s) => {
+        // could re-fetch or merge optimistic updates
       })
-      // update
-      .addCase(updateTransactionThunk.fulfilled, (state, action) => {
-        const idx = state.items.findIndex((t) => t.id === action.payload.id);
-        if (idx !== -1) state.items[idx] = action.payload;
-      })
-      .addCase(updateTransactionThunk.rejected, (state, action) => {
-        state.error = action.payload || action.error.message || "Update failed";
-      })
+
       // delete
       .addCase(
         deleteTransactionThunk.fulfilled,
-        (state, action: PayloadAction<string>) => {
-          state.items = state.items.filter((t) => t.id !== action.payload);
+        (s, a: PayloadAction<string>) => {
+          s.items = s.items.filter((t) => t.id !== a.payload);
         }
-      )
-      .addCase(deleteTransactionThunk.rejected, (state, action) => {
-        state.error = action.payload || action.error.message || "Delete failed";
-      });
+      );
   },
 });
 

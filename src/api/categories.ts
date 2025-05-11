@@ -1,38 +1,66 @@
-import axios from "./axios";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+} from "firebase/firestore";
+import { auth } from "../firebase";
 import type { Category } from "../types/category";
 
-/**
- * Fetch all categories for the current user.
- */
-export const fetchCategories = async (): Promise<Category[]> => {
-  const response = await axios.get("/categories");
-  return response.data;
-};
+const db = getFirestore();
 
-/**
- * Create a new category.
- */
-export const createCategory = async (
+function requireAuthUid(): string {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Must be logged in");
+  return user.uid;
+}
+
+/** Fetch categories for current user */
+export async function fetchCategories(): Promise<Category[]> {
+  const uid = requireAuthUid();
+  const q = query(
+    collection(db, "categories"),
+    where("userId", "==", uid),
+    orderBy("name")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({
+    id: d.id,
+    ...(d.data() as Omit<Category, "id">),
+  }));
+}
+
+/** Create a new category */
+export async function createCategory(
   data: Omit<Category, "id" | "userId">
-): Promise<Category> => {
-  const response = await axios.post("/categories", data);
-  return response.data;
-};
+): Promise<Category> {
+  const uid = requireAuthUid();
+  const docRef = await addDoc(collection(db, "categories"), {
+    ...data,
+    userId: uid,
+  });
+  return { id: docRef.id, ...data, userId: uid };
+}
 
-/**
- * Update a category by ID.
- */
-export const updateCategory = async (
+/** Update category */
+export async function updateCategory(
   id: string,
   updates: Partial<Omit<Category, "id" | "userId">>
-): Promise<Category> => {
-  const response = await axios.patch(`/categories/${id}`, updates);
-  return response.data;
-};
+): Promise<void> {
+  const uid = requireAuthUid();
+  const cDoc = doc(db, "categories", id);
+  await updateDoc(cDoc, updates);
+}
 
-/**
- * Delete a category by ID.
- */
-export const deleteCategory = async (id: string): Promise<void> => {
-  await axios.delete(`/categories/${id}`);
-};
+/** Delete category */
+export async function deleteCategory(id: string): Promise<void> {
+  const uid = requireAuthUid();
+  const cDoc = doc(db, "categories", id);
+  await deleteDoc(cDoc);
+}

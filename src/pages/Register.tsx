@@ -2,6 +2,8 @@ import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 
 export default function Register() {
   const [email, setEmail] = useState<string>("");
@@ -42,6 +44,10 @@ export default function Register() {
         <br />
         <button type="submit">Register</button>
       </form>
+      <p>
+  Already have an account? <Link to="/login">Login</Link>
+</p>
     </div>
+    
   );
 }

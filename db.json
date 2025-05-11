@@ -5,7 +5,59 @@
       "name": "Q",
       "color": "#000000",
       "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "57bc",
+      "name": "W",
+      "color": "#bd2e2e",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
     }
   ],
-  "transactions": []
+  "transactions": [
+    {
+      "id": "b422",
+      "type": "expense",
+      "amount": -29,
+      "categoryId": "57bc",
+      "date": "2025-05-13",
+      "description": "Test sdfsdf",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "d51f",
+      "type": "income",
+      "amount": 1647,
+      "categoryId": "7c7e",
+      "date": "2025-05-15",
+      "description": "dsfsdfdfgd",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "cb34",
+      "type": "expense",
+      "amount": 40,
+      "categoryId": "57bc",
+      "date": "2025-05-14",
+      "description": "пр",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "a049",
+      "type": "income",
+      "amount": 73,
+      "categoryId": "7c7e",
+      "date": "2025-05-20",
+      "description": "иппавпар",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "eab4",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3",
+      "type": "income",
+      "amount": 42,
+      "categoryId": "57bc",
+      "date": "2025-05-09",
+      "description": "fа"
+    }
+  ]
 }

@@ -21,6 +21,14 @@ export const deleteTransactionThunk = createAsyncThunk<string, string>(
   }
 );
 
+export const editTransactionThunk = createAsyncThunk<
+  { id: string; updates: Partial<Omit<Transaction, "id" | "userId">> },
+  { id: string; updates: Partial<Omit<Transaction, "id" | "userId">> }
+>("transactions/editOne", async ({ id, updates }) => {
+  await api.updateTransaction(id, updates);
+  return { id, updates };
+});
+
 interface TransactionsState {
   items: Transaction[];
   loading: boolean;
@@ -53,6 +61,12 @@ const transactionsSlice = createSlice({
       })
       .addCase(addTransaction.fulfilled, (s, a: PayloadAction<Transaction>) => {
         s.items.unshift(a.payload);
+      })
+      .addCase(editTransactionThunk.fulfilled, (s, a) => {
+        const index = s.items.findIndex((t) => t.id === a.payload.id);
+        if (index !== -1) {
+          s.items[index] = { ...s.items[index], ...a.payload.updates };
+        }
       })
       .addCase(deleteTransactionThunk.fulfilled, (s, a: PayloadAction<string>) => {
         s.items = s.items.filter((t) => t.id !== a.payload);

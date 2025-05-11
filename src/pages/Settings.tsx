@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { loadCategories, addCategory, deleteCategoryThunk } from "../features/categories/categoriesSlice";
+import {
+  loadCategories,
+  addCategory,
+  deleteCategoryThunk,
+} from "../features/categories/categoriesSlice";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase";
 
@@ -21,7 +25,8 @@ export default function Settings() {
     e.preventDefault();
     if (!name.trim() || !user) return;
 
-    await dispatch(addCategory({ name: name.trim(), color, userId: user.uid }));
+   await dispatch(addCategory({ name: name.trim(), color, userId: user.uid }));
+
     setName("");
     setColor("#000000");
   };

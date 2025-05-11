@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Env files
+.env
+.env.*.local
+
+# OS-specific
+Thumbs.db
+ehthumbs.db
+*.bak
+*.tmp
+
+# TypeScript cache
+*.tsbuildinfo

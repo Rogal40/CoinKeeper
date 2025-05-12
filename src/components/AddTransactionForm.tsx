@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { addTransaction } from "../features/transactions/transactionsSlice";
+import { addTransactionThunk as addTransaction } from "../features/transactions/transactionsSlice";
 import { loadCategories } from "../features/categories/categoriesSlice";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase";
@@ -31,7 +31,6 @@ export default function AddTransactionForm() {
         categoryId,
         date,
         description,
-        userId: user.uid,
       })
     );
 
@@ -49,16 +48,37 @@ export default function AddTransactionForm() {
         <option value="expense">Expense</option>
       </select>
 
-      <input type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} required />
-      <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(Number(e.target.value))}
+        required
+      />
+      <select
+        value={categoryId}
+        onChange={(e) => setCategoryId(e.target.value)}
+        required
+      >
         <option value="">Select category</option>
         {categories.map((c) => (
-          <option key={c.id} value={c.id}>{c.name}</option>
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
         ))}
       </select>
 
-      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-      <input type="text" placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} />
+      <input
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Description (optional)"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
       <button type="submit">Add</button>
     </form>
   );

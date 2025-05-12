@@ -7,5 +7,60 @@
       "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
     }
   ],
-  "transactions": []
+  "transactions": [
+    {
+      "id": "4c5d",
+      "type": "income",
+      "amount": 25,
+      "categoryId": "7c7e",
+      "date": "2025-05-01",
+      "description": "wqe",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "f1e0",
+      "type": "income",
+      "amount": 1234,
+      "categoryId": "7c7e",
+      "date": "2024-11-16",
+      "description": "adas",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "d854",
+      "type": "income",
+      "amount": 12455,
+      "categoryId": "7c7e",
+      "date": "2025-01-18",
+      "description": "",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "2ccc",
+      "type": "expense",
+      "amount": 1234,
+      "categoryId": "7c7e",
+      "date": "2025-03-21",
+      "description": "",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "134a",
+      "type": "income",
+      "amount": 12313,
+      "categoryId": "7c7e",
+      "date": "2025-05-11",
+      "description": "",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    },
+    {
+      "id": "7606",
+      "type": "expense",
+      "amount": 1000,
+      "categoryId": "7c7e",
+      "date": "2025-05-08",
+      "description": "",
+      "userId": "STHKj5TjLObzai16YRMGIHstAHE3"
+    }
+  ]
 }

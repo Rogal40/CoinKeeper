@@ -1,27 +1,11 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
-import type { Category } from "../../types/category";
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import * as api from "../../api/categories";
-
-export const loadCategories = createAsyncThunk<Category[], string>(
-  "categories/loadAll",
-  async (uid) => {
-    return await api.fetchCategories(uid);
-  }
-);
-
-export const addCategory = createAsyncThunk<Category, Omit<Category, "id">>(
-  "categories/addOne",
-  async (payload) => await api.createCategory(payload)
-);
-
-export const deleteCategoryThunk = createAsyncThunk<string, string>(
-  "categories/deleteOne",
-  async (id) => {
-    await api.deleteCategory(id);
-    return id;
-  }
-);
+import type { Category } from "../../types/category";
+import { auth } from "../../firebase";
 
 interface CategoriesState {
   items: Category[];
@@ -35,30 +19,64 @@ const initialState: CategoriesState = {
   error: null,
 };
 
+export const loadCategories = createAsyncThunk<Category[]>(
+  "categories/loadAll",
+  async (_, thunkAPI) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Not authenticated");
+    return await api.fetchCategories(user.uid);
+  }
+);
+
+export const addCategory = createAsyncThunk<
+  Category,
+  Omit<Category, "id" | "userId">
+>("categories/addOne", async (payload, thunkAPI) => {
+  const user = auth.currentUser!;
+  return await api.createCategory({ ...payload, userId: user.uid });
+});
+
+export const deleteCategoryThunk = createAsyncThunk<string, string>(
+  "categories/deleteOne",
+  async (id) => {
+    await api.deleteCategory(id);
+    return id;
+  }
+);
+
 const categoriesSlice = createSlice({
   name: "categories",
   initialState,
   reducers: {},
-  extraReducers: (builder) => {
+  extraReducers(builder) {
     builder
-      .addCase(loadCategories.pending, (s) => {
-        s.loading = true;
-        s.error = null;
+      .addCase(loadCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(loadCategories.fulfilled, (s, a: PayloadAction<Category[]>) => {
-        s.items = a.payload;
-        s.loading = false;
+      .addCase(
+        loadCategories.fulfilled,
+        (state, action: PayloadAction<Category[]>) => {
+          state.items = action.payload;
+          state.loading = false;
+        }
+      )
+      .addCase(loadCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to load categories";
       })
-      .addCase(loadCategories.rejected, (s, a) => {
-        s.loading = false;
-        s.error = a.error.message ?? "Failed to load categories";
-      })
-      .addCase(addCategory.fulfilled, (s, a: PayloadAction<Category>) => {
-        s.items.push(a.payload);
-      })
-      .addCase(deleteCategoryThunk.fulfilled, (s, a: PayloadAction<string>) => {
-        s.items = s.items.filter((c) => c.id !== a.payload);
-      });
+      .addCase(
+        addCategory.fulfilled,
+        (state, action: PayloadAction<Category>) => {
+          state.items.push(action.payload);
+        }
+      )
+      .addCase(
+        deleteCategoryThunk.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.items = state.items.filter((c) => c.id !== action.payload);
+        }
+      );
   },
 });
 

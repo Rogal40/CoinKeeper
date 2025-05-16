@@ -1,38 +1,35 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import styles from "./Auth.module.css";
 
 export default function Login() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Logged in:", userCredential.user);
+      await signInWithEmailAndPassword(auth, email, password);
       navigate("/dashboard");
-    } catch (error: any) {
-      alert(error.message);
+    } catch (err: any) {
+      alert(err.message);
     }
   };
 
   return (
-    <div>
+    <div className={styles.container}>
       <h1>Login</h1>
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleLogin} className={styles.form}>
         <input
           type="email"
-          placeholder="Email address"
+          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <br />
         <input
           type="password"
           placeholder="Password"
@@ -40,13 +37,11 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <br />
         <button type="submit">Log In</button>
       </form>
       <p>
-  Don’t have an account? <Link to="/register">Register</Link>
-</p>
+        Don’t have an account? <Link to="/register">Register</Link>
+      </p>
     </div>
-    
   );
 }

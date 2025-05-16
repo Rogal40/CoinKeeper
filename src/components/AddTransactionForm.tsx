@@ -1,24 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { addTransaction } from "../features/transactions/transactionsSlice";
 import { loadCategories } from "../features/categories/categoriesSlice";
+import { addTransactionThunk } from "../features/transactions/transactionsSlice";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase";
 
 export default function AddTransactionForm() {
   const dispatch = useAppDispatch();
-  const categories = useAppSelector((state) => state.categories.items);
-  const [user] = useAuthState(auth);
+  const categories = useAppSelector((s) => s.categories.items);
+  const [user, loading] = useAuthState(auth);
 
   const [type, setType] = useState<"income" | "expense">("income");
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState(0);
   const [categoryId, setCategoryId] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
 
   useEffect(() => {
     if (user) {
-      dispatch(loadCategories(user.uid));
+      dispatch(loadCategories());
     }
   }, [user, dispatch]);
 
@@ -27,14 +27,7 @@ export default function AddTransactionForm() {
     if (!categoryId || !date || !amount || !user) return;
 
     await dispatch(
-      addTransaction({
-        type,
-        amount,
-        categoryId,
-        date,
-        description,
-        userId: user.uid,
-      })
+      addTransactionThunk({ type, amount, categoryId, date, description })
     );
 
     setAmount(0);
@@ -43,9 +36,15 @@ export default function AddTransactionForm() {
     setDescription("");
   };
 
+  if (loading) return <div>Loading…</div>;
+
   return (
-    <form onSubmit={handleSubmit}>
-      <select value={type} onChange={(e) => setType(e.target.value as any)}>
+    <form onSubmit={handleSubmit} className="space-y-2 mb-4">
+      <h2 className="text-xl font-bold">Add Transaction</h2>
+      <select
+        value={type}
+        onChange={(e) => setType(e.target.value as "income" | "expense")}
+      >
         <option value="income">Income</option>
         <option value="expense">Expense</option>
       </select>
@@ -54,6 +53,7 @@ export default function AddTransactionForm() {
         type="number"
         value={amount}
         onChange={(e) => setAmount(Number(e.target.value))}
+        placeholder="Amount"
         required
       />
 

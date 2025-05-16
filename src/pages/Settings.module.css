@@ -1,0 +1,23 @@
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 1rem;
+}
+.form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.list {
+  margin-top: 1rem;
+}
+.item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+.loading {
+  text-align: center;
+  padding: 2rem;
+}

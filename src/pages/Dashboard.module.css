@@ -1,0 +1,30 @@
+.container {
+  padding: 1rem;
+  max-width: 800px;
+  margin: auto;
+}
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.user {
+  font-size: 0.9rem;
+  color: #555;
+}
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+.balance {
+  font-size: 1.5rem;
+  margin: 1rem 0;
+}
+.section {
+  margin-bottom: 2rem;
+}
+.loading {
+  text-align: center;
+  padding: 2rem;
+}

@@ -1,17 +1,41 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
-import type { Transaction } from "../../types/transaction";
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import * as api from "../../api/transactions";
+import type { Transaction } from "../../types/transaction";
+import { auth } from "../../firebase";
 
-export const loadTransactions = createAsyncThunk<Transaction[], string>(
+interface TransactionsState {
+  items: Transaction[];
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: TransactionsState = {
+  items: [],
+  loading: false,
+  error: null,
+};
+
+export const loadTransactions = createAsyncThunk<Transaction[]>(
   "transactions/loadAll",
-  async (uid) => await api.fetchTransactions(uid)
+  async (_, thunkAPI) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Not authenticated");
+    return api.fetchTransactions(user.uid);
+  }
 );
 
-export const addTransaction = createAsyncThunk<Transaction, Omit<Transaction, "id">>(
-  "transactions/addOne",
-  async (payload) => await api.createTransaction(payload)
-);
+export const addTransactionThunk = createAsyncThunk<
+  Transaction,
+  Omit<Transaction, "id" | "userId">
+>("transactions/addOne", async (payload, thunkAPI) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not authenticated");
+  return api.createTransaction({ ...payload, userId: user.uid });
+});
 
 export const deleteTransactionThunk = createAsyncThunk<string, string>(
   "transactions/deleteOne",
@@ -29,47 +53,38 @@ export const editTransactionThunk = createAsyncThunk<
   return { id, updates };
 });
 
-interface TransactionsState {
-  items: Transaction[];
-  loading: boolean;
-  error: string | null;
-}
-
-const initialState: TransactionsState = {
-  items: [],
-  loading: false,
-  error: null,
-};
-
 const transactionsSlice = createSlice({
   name: "transactions",
   initialState,
   reducers: {},
-  extraReducers: (builder) => {
+  extraReducers(builder) {
     builder
-      .addCase(loadTransactions.pending, (s) => {
-        s.loading = true;
-        s.error = null;
+      .addCase(loadTransactions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(loadTransactions.fulfilled, (s, a: PayloadAction<Transaction[]>) => {
-        s.items = a.payload;
-        s.loading = false;
+      .addCase(
+        loadTransactions.fulfilled,
+        (state, action: PayloadAction<Transaction[]>) => {
+          state.items = action.payload;
+          state.loading = false;
+        }
+      )
+      .addCase(loadTransactions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to load transactions";
       })
-      .addCase(loadTransactions.rejected, (s, a) => {
-        s.loading = false;
-        s.error = a.error.message ?? "Failed to load transactions";
+      .addCase(addTransactionThunk.fulfilled, (state, action) => {
+        state.items.unshift(action.payload);
       })
-      .addCase(addTransaction.fulfilled, (s, a: PayloadAction<Transaction>) => {
-        s.items.unshift(a.payload);
-      })
-      .addCase(editTransactionThunk.fulfilled, (s, a) => {
-        const index = s.items.findIndex((t) => t.id === a.payload.id);
-        if (index !== -1) {
-          s.items[index] = { ...s.items[index], ...a.payload.updates };
+      .addCase(editTransactionThunk.fulfilled, (state, action) => {
+        const idx = state.items.findIndex((t) => t.id === action.payload.id);
+        if (idx !== -1) {
+          state.items[idx] = { ...state.items[idx], ...action.payload.updates };
         }
       })
-      .addCase(deleteTransactionThunk.fulfilled, (s, a: PayloadAction<string>) => {
-        s.items = s.items.filter((t) => t.id !== a.payload);
+      .addCase(deleteTransactionThunk.fulfilled, (state, action) => {
+        state.items = state.items.filter((t) => t.id !== action.payload);
       });
   },
 });

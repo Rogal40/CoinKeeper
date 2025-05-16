@@ -31,7 +31,6 @@ export default function TransactionList() {
       })
     );
 
-    // Сброс полей
     setEditId(null);
     setEditAmount(0);
     setEditCategory("");
@@ -49,8 +48,11 @@ export default function TransactionList() {
 
           return (
             <li key={t.id} className="mb-2">
-              <strong>{t.type}</strong> — {t.amount} ₸ — {category?.name} — {t.date}
-              <button onClick={() => dispatch(deleteTransactionThunk(t.id))}>Delete</button>
+              <strong>{t.type}</strong> — {t.amount} ₸ — {category?.name} —{" "}
+              {t.date}
+              <button onClick={() => dispatch(deleteTransactionThunk(t.id))}>
+                Delete
+              </button>
               <button
                 onClick={() => {
                   setEditId(t.id);
@@ -62,7 +64,6 @@ export default function TransactionList() {
               >
                 Edit
               </button>
-
               {isEditing && (
                 <div className="mt-2">
                   <input
